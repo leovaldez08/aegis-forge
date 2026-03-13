@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { getSocket } from "@/lib/socket";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+
 export interface TelemetryReading {
   machineId: string;
   vibrationRms: number;
@@ -25,7 +27,7 @@ export interface AlertEvent {
 const MAX_READINGS_PER_MACHINE = 60; // Keep last 60 data points per chart
 
 export function useSocket() {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(() => getSocket().connected);
   const [telemetryMap, setTelemetryMap] = useState<
     Record<string, TelemetryReading[]>
   >({});
@@ -40,7 +42,34 @@ export function useSocket() {
   }, []);
 
   useEffect(() => {
+    // 1. Fetch historical alerts immediately
+    fetch(`${BACKEND_URL}/api/alerts?limit=50`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.alerts && Array.isArray(data.alerts)) {
+          // Map DB records to AlertEvent shape
+          const history = data.alerts.map((a: Record<string, unknown>) => ({
+            id: a.id as string,
+            machineId: a.machineId as string,
+            machineName: a.machineName as string,
+            machineType: a.machineType as string,
+            workerName: a.workerName as string,
+            severity: a.severity as "warning" | "critical",
+            agentMessage: a.agentMessage as string,
+            anomalyData: a.anomalyData as Record<string, number>,
+            timestamp: a.createdAt as string,
+          }));
+          setAlerts(history);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch alert history:", err));
+
     const socket = getSocket();
+
+    // 2. If already connected (e.g., navigating from Dashboard -> PWA)
+    if (socket.connected) {
+      socket.emit("join:all");
+    }
 
     socket.on("connect", () => {
       setIsConnected(true);

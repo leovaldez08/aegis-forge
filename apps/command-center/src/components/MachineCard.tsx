@@ -3,6 +3,7 @@
 // Shows name, type, current readings, and health status
 
 import StatusBadge from "./StatusBadge";
+import { Settings, Wrench, Link as LinkIcon, Bot, MapPin, Factory } from "lucide-react";
 import type { TelemetryReading } from "@/hooks/useSocket";
 
 interface MachineCardProps {
@@ -35,11 +36,11 @@ export default function MachineCard({ machine, latestReading }: MachineCardProps
   };
 
   // Machine type → icon mapping
-  const icons: Record<string, string> = {
-    "CNC Lathe": "⚙️",
-    "Hydraulic Press": "🔧",
-    "Conveyor System": "🔗",
-    "Robotic Welder": "🤖",
+  const icons: Record<string, React.ReactNode> = {
+    "CNC Lathe": <Settings className="h-6 w-6 text-foreground" />,
+    "Hydraulic Press": <Wrench className="h-6 w-6 text-foreground" />,
+    "Conveyor System": <LinkIcon className="h-6 w-6 text-foreground" />,
+    "Robotic Welder": <Bot className="h-6 w-6 text-foreground" />,
   };
 
   return (
@@ -59,9 +60,11 @@ export default function MachineCard({ machine, latestReading }: MachineCardProps
         {}
         <div className="mb-4 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">{icons[machine.type] || "🏭"}</span>
+            <span className="flex items-center justify-center p-2 rounded-lg bg-background border border-border text-foreground">
+              {icons[machine.type] || <Factory className="h-6 w-6" />}
+            </span>
             <div>
-              <h3 className="font-semibold text-white">{machine.name.replace(/_/g, " ")}</h3>
+              <h3 className="font-semibold text-foreground">{machine.name.replace(/_/g, " ")}</h3>
               <p className="text-xs text-zinc-500">{machine.type}</p>
             </div>
           </div>
@@ -69,19 +72,19 @@ export default function MachineCard({ machine, latestReading }: MachineCardProps
         </div>
 
         {}
-        <p className="mb-4 text-xs text-zinc-600">
-          📍 {machine.location || "Unknown"}
+        <p className="mb-4 text-xs flex items-center gap-1 text-muted-foreground">
+          <MapPin className="h-3 w-3" /> {machine.location || "Unknown"}
         </p>
 
         {}
         <div className="mb-3">
           <div className="mb-1 flex justify-between text-xs">
-            <span className="text-zinc-400">Vibration</span>
-            <span className="font-mono text-zinc-300">
+            <span className="text-muted-foreground">Vibration</span>
+            <span className="font-mono text-foreground opacity-90">
               {vibration > 0 ? `${vibration.toFixed(2)} mm/s` : "—"}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
             <div
               className={`h-full rounded-full transition-all duration-500 ${getBarColor(vibPercent)}`}
               style={{ width: `${Math.min(vibPercent, 100)}%` }}
@@ -92,12 +95,12 @@ export default function MachineCard({ machine, latestReading }: MachineCardProps
         {}
         <div>
           <div className="mb-1 flex justify-between text-xs">
-            <span className="text-zinc-400">Temperature</span>
-            <span className="font-mono text-zinc-300">
+            <span className="text-muted-foreground">Temperature</span>
+            <span className="font-mono text-foreground opacity-90">
               {temp > 0 ? `${temp.toFixed(1)}°C` : "—"}
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
             <div
               className={`h-full rounded-full transition-all duration-500 ${getBarColor(tempPercent)}`}
               style={{ width: `${Math.min(tempPercent, 100)}%` }}

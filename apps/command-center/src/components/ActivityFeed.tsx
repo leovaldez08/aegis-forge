@@ -3,6 +3,7 @@
 // Auto-scrolling feed of persona-based alert messages
 
 import { useEffect, useRef } from "react";
+import { Bot, BellOff, AlertTriangle, ShieldAlert } from "lucide-react";
 import type { AlertEvent } from "@/hooks/useSocket";
 
 interface ActivityFeedProps {
@@ -23,13 +24,13 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
     warning: {
       border: "border-l-amber-500",
       bg: "bg-amber-500/5",
-      icon: "⚠️",
+      icon: <AlertTriangle className="h-4 w-4 text-amber-500" />,
       badge: "bg-amber-500/20 text-amber-400",
     },
     critical: {
       border: "border-l-red-500",
       bg: "bg-red-500/5",
-      icon: "🚨",
+      icon: <ShieldAlert className="h-4 w-4 text-red-500" />,
       badge: "bg-red-500/20 text-red-400",
     },
   };
@@ -37,10 +38,10 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       {}
-      <div className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+      <div className="flex items-center justify-between border-b border-border px-5 py-3 bg-muted/30">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🤖</span>
-          <h3 className="text-sm font-medium text-zinc-300">
+          <Bot className="h-5 w-5 text-primary-amber" />
+          <h3 className="text-sm font-medium text-foreground">
             Machine Activity
           </h3>
         </div>
@@ -54,9 +55,9 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
         {alerts.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
-              <div className="mb-2 text-3xl">🔇</div>
-              <p className="text-sm text-zinc-500">No alerts yet</p>
-              <p className="text-xs text-zinc-600">
+              <BellOff className="mx-auto mb-2 h-8 w-8 text-muted-foreground opacity-50" />
+              <p className="text-sm text-foreground font-medium">No alerts yet</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 Machines are running smoothly
               </p>
             </div>
@@ -82,8 +83,8 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
                 {}
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span>{cfg.icon}</span>
-                    <span className="text-xs font-semibold text-white">
+                    {cfg.icon}
+                    <span className="text-xs font-semibold text-foreground">
                       {alert.machineName.replace(/_/g, " ")}
                     </span>
                     <span
@@ -96,14 +97,14 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
                 </div>
 
                 {}
-                <p className="text-sm leading-relaxed text-zinc-300">
+                <p className="text-sm leading-relaxed text-foreground opacity-90">
                   {alert.agentMessage}
                 </p>
 
-                {}
+                {/* Worker footer */}
                 <div className="mt-2 flex items-center gap-1">
-                  <span className="text-[10px] text-zinc-600">
-                    👷 Notified: {alert.workerName}
+                  <span className="text-[10px] text-muted-foreground">
+                    Notified: <span className="font-medium text-foreground opacity-80">{alert.workerName}</span>
                   </span>
                 </div>
               </div>

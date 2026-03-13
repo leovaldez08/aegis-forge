@@ -1,15 +1,3 @@
-// Alert Service — AI Trigger & Notification
-//
-// When an anomaly is detected, this service:
-//   1. POSTs machine context to the Python AI microservice
-//   2. Receives an LLM-generated persona message
-//   3. Logs the alert in the maintenance_logs table
-//   4. Broadcasts the alert via Socket.io
-//   5. Falls back to a templated message if AI is offline
-//
-// Offline-first: The system never fails because the AI
-// service is unreachable. Local alerts still fire.
-
 import { db } from "../db/connection.js";
 import { maintenanceLogs } from "../db/schema.js";
 import { env } from "../config/env.js";
@@ -45,15 +33,17 @@ interface AnomalyData {
   exceed_ratio_temp: number;
 }
 
-
 function generateFallbackMessage(
   machine: MachineContext,
   worker: WorkerContext | null,
   severity: string,
-  anomaly: AnomalyData
+  anomaly: AnomalyData,
 ): string {
   const workerName = worker ? worker.name : "Operator";
-  const vibPercent = ((anomaly.vibration_rms / machine.maxVibration) * 100).toFixed(0);
+  const vibPercent = (
+    (anomaly.vibration_rms / machine.maxVibration) *
+    100
+  ).toFixed(0);
   const tempPercent = ((anomaly.temp_c / machine.maxTemp) * 100).toFixed(0);
 
   return (
@@ -64,12 +54,11 @@ function generateFallbackMessage(
   );
 }
 
-
 async function callAiService(
   machine: MachineContext,
   worker: WorkerContext | null,
   severity: string,
-  anomaly: AnomalyData
+  anomaly: AnomalyData,
 ): Promise<string | null> {
   try {
     const response = await fetch(`${env.AI_SERVICE_URL}/generate-alert`, {
@@ -96,7 +85,7 @@ async function callAiService(
 
     if (!response.ok) {
       console.warn(
-        `⚠️  [ALERT] AI service returned ${response.status}: ${response.statusText}`
+        `⚠️  [ALERT] AI service returned ${response.status}: ${response.statusText}`,
       );
       return null;
     }
@@ -106,26 +95,35 @@ async function callAiService(
   } catch (error) {
     // AI service is offline — expected behavior for offline-first design
     console.warn(
-      `⚠️  [ALERT] AI service unreachable — using fallback template`
+      `⚠️  [ALERT] AI service unreachable — using fallback template`,
     );
     return null;
   }
 }
-
 
 export async function triggerAlert(
   machine: MachineContext,
   worker: WorkerContext | null,
   severity: "warning" | "critical",
   anomalyData: AnomalyData,
-  io: SocketServer
+  io: SocketServer,
 ) {
   console.log(`📢 [ALERT] Triggering ${severity} alert for ${machine.name}...`);
 
-  let agentMessage = await callAiService(machine, worker, severity, anomalyData);
+  let agentMessage = await callAiService(
+    machine,
+    worker,
+    severity,
+    anomalyData,
+  );
 
   if (!agentMessage) {
-    agentMessage = generateFallbackMessage(machine, worker, severity, anomalyData);
+    agentMessage = generateFallbackMessage(
+      machine,
+      worker,
+      severity,
+      anomalyData,
+    );
     console.log(`   → Using fallback message (AI offline)`);
   } else {
     console.log(`   → AI persona message received`);

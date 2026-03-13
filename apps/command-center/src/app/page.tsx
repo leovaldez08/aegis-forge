@@ -11,6 +11,9 @@ import { useSocket } from "@/hooks/useSocket";
 import MachineCard from "@/components/MachineCard";
 import TelemetryChart from "@/components/TelemetryChart";
 import ActivityFeed from "@/components/ActivityFeed";
+import ThemeToggle from "@/components/ThemeToggle";
+import Image from "next/image";
+import { Factory, CheckCircle2, AlertTriangle, WifiOff } from "lucide-react";
 
 interface Machine {
   id: string;
@@ -67,7 +70,7 @@ export default function Dashboard() {
     const healthy = machines.filter(
       (m) =>
         !latestReadings[m.name] ||
-        (m.status !== "warning" && m.status !== "critical")
+        (m.status !== "warning" && m.status !== "critical"),
     ).length;
     return {
       total: machines.length,
@@ -76,26 +79,30 @@ export default function Dashboard() {
       critical: machines.filter((m) => m.status === "critical").length,
       totalReadings: Object.values(telemetryMap).reduce(
         (sum, r) => sum + r.length,
-        0
+        0,
       ),
     };
   }, [machines, latestReadings, telemetryMap]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      {}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-3">
-          {}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-lg font-bold">
-              ⚡
+          <div className="flex items-center rounded-lg gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-card border border-border shadow-sm">
+              <Image
+                src="/logo.png"
+                alt="Aegis Node Logo"
+                width={48}
+                height={48}
+                className="object-contain"
+              />
             </div>
             <div>
-              <h1 className="text-base font-bold tracking-tight">
+              <h1 className="text-base font-bold tracking-tight text-foreground">
                 AEGIS NODE
               </h1>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">
                 Command Center
               </p>
             </div>
@@ -115,23 +122,24 @@ export default function Dashboard() {
 
             {}
             <div className="hidden md:flex items-center gap-3">
-              <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-zinc-400">
-                🏭 {stats.total} machines
+              <span className="flex items-center gap-1.5 rounded-full bg-muted border border-border px-3 py-1 text-xs text-muted-foreground font-medium">
+                <Factory className="h-3.5 w-3.5" /> {stats.total} machines
               </span>
-              <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-                ✓ {stats.healthy} healthy
+              <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                <CheckCircle2 className="h-3.5 w-3.5" /> {stats.healthy} healthy
               </span>
               {stats.critical > 0 && (
-                <span className="rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-400 animate-pulse">
-                  🚨 {stats.critical} critical
+                <span className="flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-600 dark:text-red-400 animate-pulse font-medium">
+                  <AlertTriangle className="h-3.5 w-3.5" /> {stats.critical}{" "}
+                  critical
                 </span>
               )}
             </div>
 
-            {}
-            <span className="font-mono text-xs text-zinc-600">
+            <span className="font-mono text-xs text-muted-foreground font-medium">
               {currentTime.toLocaleTimeString("en-US", { hour12: false })}
             </span>
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -196,15 +204,15 @@ export default function Dashboard() {
               </div>
 
               {Object.keys(telemetryMap).length === 0 && (
-                <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-white/10">
+                <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-border bg-muted/20">
                   <div className="text-center">
-                    <div className="mb-2 text-4xl">📡</div>
-                    <p className="text-sm text-zinc-500">
+                    <WifiOff className="mx-auto mb-2 h-10 w-10 text-muted-foreground opacity-50" />
+                    <p className="text-sm text-foreground font-medium">
                       Waiting for telemetry data...
                     </p>
-                    <p className="mt-1 text-xs text-zinc-600">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Start the simulator:{" "}
-                      <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-zinc-400">
+                      <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs border border-border">
                         npx tsx tools/simulator.ts
                       </code>
                     </p>
