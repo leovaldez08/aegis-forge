@@ -92,6 +92,11 @@ async function bootstrap() {
     );
   });
 
+  // Start the Predictive Trend continuous analyzer
+  import("./services/scheduler.js").then(({ initScheduler }) => {
+    initScheduler(io);
+  });
+
   try {
     const address = await app.listen({
       port: env.PORT,

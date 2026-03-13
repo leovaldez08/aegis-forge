@@ -18,10 +18,8 @@ import { updateMachineStatus } from "./telemetry.js";
 import { triggerAlert } from "./alert.js";
 import type { Server as SocketServer } from "socket.io";
 
-const WINDOW_SIZE = 10; // Number of recent readings to analyze
-const WARNING_RATIO = 0.6; // 60% of window must exceed warning threshold
-const WARNING_THRESHOLD_FACTOR = 0.8; // 80% of max = warning level
-const COOLDOWN_MS = 5 * 60 * 1000; // 5-minute cooldown between alerts
+const WINDOW_SIZE = 10; // --- Configuration ---
+const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes between alerts
 
 // Sliding windows and cooldown timers per machine.
 // Stored in memory for speed — this is a local edge node,
@@ -154,32 +152,44 @@ export async function analyzeReading(
   pushToWindow(window.vibrations, vibration, WINDOW_SIZE);
   pushToWindow(window.temperatures, temp, WINDOW_SIZE);
 
-  const vibWarningLevel = machine.maxVibration * WARNING_THRESHOLD_FACTOR;
-  const tempWarningLevel = machine.maxTemp * WARNING_THRESHOLD_FACTOR;
-
-  // Count how many readings in the window exceed warning level
-  const vibExceedCount = window.vibrations.filter(
-    (v) => v > vibWarningLevel
-  ).length;
-  const tempExceedCount = window.temperatures.filter(
-    (t) => t > tempWarningLevel
-  ).length;
-
-  const vibExceedRatio = vibExceedCount / window.vibrations.length;
-  const tempExceedRatio = tempExceedCount / window.temperatures.length;
+  // --- NEW ML ISOLATION FOREST FLOW --- //
+  
+  // Package the window to send to Python AI Service
+  const windowData = window.vibrations.map((v, i) => ({
+    vibration_rms: v,
+    temp_c: window.temperatures[i],
+  }));
 
   let newStatus: "healthy" | "warning" | "critical" = "healthy";
 
-  // CRITICAL: Any single reading exceeds the absolute max
-  if (vibration > machine.maxVibration || temp > machine.maxTemp) {
-    newStatus = "critical";
-  }
-  // WARNING: Sustained elevated readings (>60% of window above 80% of max)
-  else if (
-    vibExceedRatio >= WARNING_RATIO ||
-    tempExceedRatio >= WARNING_RATIO
-  ) {
-    newStatus = "warning";
+  try {
+    const mlResponse = await fetch(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/detect-anomaly`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        machine: {
+          baseline_vibration: machine.baselineVibration,
+          max_vibration: machine.maxVibration,
+          max_temp: machine.maxTemp
+        },
+        window: windowData
+      })
+    });
+
+    if (mlResponse.ok) {
+      const mlData = await mlResponse.json() as { is_anomaly: boolean, score: number, severity: "healthy" | "warning" | "critical" };
+      newStatus = mlData.severity;
+      
+      // ML provides a negative score for anomalies.
+      if (mlData.is_anomaly && mlData.score) {
+        console.log(`🧠 [ML] Isolation Forest detected anomaly! Score: ${mlData.score.toFixed(3)}`);
+      }
+    }
+  } catch (error) {
+    console.warn("⚠️ [ML] Isolation Forest unreachable, falling back to basic threshold safety nets.");
+    if (vibration > machine.maxVibration || temp > machine.maxTemp) {
+      newStatus = "critical";
+    }
   }
 
   const previousStatus = window.currentStatus;
@@ -219,8 +229,8 @@ export async function analyzeReading(
     window_temp_avg:
       window.temperatures.reduce((a, b) => a + b, 0) /
       window.temperatures.length,
-    exceed_ratio_vibration: vibExceedRatio,
-    exceed_ratio_temp: tempExceedRatio,
+    exceed_ratio_vibration: 0, // Deprecated by ML
+    exceed_ratio_temp: 0,      // Deprecated by ML
   };
 
   console.log(

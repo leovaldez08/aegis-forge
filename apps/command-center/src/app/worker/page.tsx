@@ -1,7 +1,7 @@
 "use client";
 
 import { useSocket } from "@/hooks/useSocket";
-import ActivityFeed from "@/components/ActivityFeed";
+import WorkerFeed from "@/components/WorkerFeed";
 import ThemeToggle from "@/components/ThemeToggle";
 import Image from "next/image";
 import { Wrench } from "lucide-react";
@@ -63,7 +63,7 @@ export default function WorkerPWA() {
         </div>
 
         <div className="h-[calc(100dvh-150px)]">
-          <ActivityFeed alerts={alerts} />
+          <WorkerFeed alerts={alerts} />
         </div>
       </main>
     </div>

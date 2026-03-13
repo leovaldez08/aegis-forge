@@ -41,10 +41,10 @@ export async function alertRoutes(app: FastifyInstance) {
   // Update alert status (acknowledge / resolve)
   app.patch<{
     Params: { id: string };
-    Body: { status: "acknowledged" | "resolved" };
+    Body: { status: "acknowledged" | "resolved" | "false_alarm" };
   }>("/api/alerts/:id", async (req, reply) => {
     const { status } = req.body;
-    if (!["acknowledged", "resolved"].includes(status)) {
+    if (!["acknowledged", "resolved", "false_alarm"].includes(status)) {
       return reply.status(400).send({ error: "Invalid status" });
     }
 

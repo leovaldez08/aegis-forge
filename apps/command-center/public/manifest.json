@@ -2,7 +2,7 @@
   "name": "Aegis Node",
   "short_name": "Aegis",
   "description": "Industrial predictive maintenance dashboard",
-  "start_url": "/",
+  "start_url": "/worker",
   "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#09090b",
