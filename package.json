@@ -1,0 +1,19 @@
+{
+  "name": "aegis-forge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aegis Node — Enterprise-grade, offline-first, predictive machine maintenance system",
+  "workspaces": [
+    "apps/*",
+    "tools"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w apps/backend",
+    "dev:frontend": "npm run dev -w apps/command-center",
+    "seed": "npm run seed -w apps/backend",
+    "simulate": "npx tsx tools/simulator.ts"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

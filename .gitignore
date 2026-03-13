@@ -1,0 +1,23 @@
+node_modules/
+.next/
+dist/
+ build/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Env vars
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# DB
+data/
