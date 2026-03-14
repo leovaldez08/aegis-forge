@@ -8,7 +8,6 @@
 import { Server as HttpServer } from "http";
 import { Server as SocketServer } from "socket.io";
 
-
 export function initSocketServer(httpServer: HttpServer): SocketServer {
   const io = new SocketServer(httpServer, {
     cors: {

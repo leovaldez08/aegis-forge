@@ -56,7 +56,7 @@ async function flushBuffer() {
 
 export function initMqttSubscriber(
   io: SocketServer,
-  onTelemetry?: (machineId: string, data: TelemetryData) => void
+  onTelemetry?: (machineId: string, data: TelemetryData) => void,
 ) {
   const topic = `${env.MQTT_TOPIC_PREFIX}/#`;
   console.log(`📡 [MQTT] Connecting to broker: ${env.MQTT_BROKER_URL}`);
@@ -86,12 +86,17 @@ export function initMqttSubscriber(
       const raw = JSON.parse(payload.toString());
       const result = TelemetryPayload.safeParse(raw);
       if (!result.success) {
-        console.warn("⚠️  [MQTT] Invalid payload:", result.error.issues.map((i) => i.message).join(", "));
+        console.warn(
+          "⚠️  [MQTT] Invalid payload:",
+          result.error.issues.map((i) => i.message).join(", "),
+        );
         return;
       }
 
       const data = result.data;
-      const readingTimestamp = data.timestamp ? new Date(data.timestamp) : new Date();
+      const readingTimestamp = data.timestamp
+        ? new Date(data.timestamp)
+        : new Date();
 
       // Resolve machine name → UUID, then buffer for DB write
       resolveMachineUUID(data.machine_id).then((uuid) => {

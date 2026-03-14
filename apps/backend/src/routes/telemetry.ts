@@ -16,7 +16,7 @@ export async function telemetryRoutes(app: FastifyInstance) {
       const limit = parseInt(req.query.limit || "50", 10);
       const readings = await getLatestReadings(req.params.machineId, limit);
       return { readings };
-    }
+    },
   );
 
   // Historical readings within a time range
@@ -31,7 +31,7 @@ export async function telemetryRoutes(app: FastifyInstance) {
     const readings = await getReadingsInRange(
       req.params.machineId,
       since,
-      limit
+      limit,
     );
     return { readings };
   });

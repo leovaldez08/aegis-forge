@@ -29,7 +29,7 @@ Aegis Node is an enterprise-grade, offline-first IoT predictive maintenance plat
 | **Message Broker** | Eclipse Mosquitto           | Lightweight MQTT broker for IoT device ingestion.                    |
 | **AI Service**     | FastAPI + Python            | Asynchronous microservice wrapping Gemini and `scikit-learn`.        |
 | **LLM Engine**     | Google Gemini 2.0 Flash     | Ultra-fast context and persona generation.                           |
-| **ML Engine**      | Isolation Forest            | Unsupervised anomaly detection for complex telemetry patterns.        |
+| **ML Engine**      | Isolation Forest            | Unsupervised anomaly detection for complex telemetry patterns.       |
 | **Frontend/PWA**   | Next.js 16 + Tailwind CSS   | React Server Components dashboard with a dedicated mobile PWA route. |
 | **Real-Time**      | Socket.io                   | WebSockets for live telemetry charting and instant alert dispatch.   |
 

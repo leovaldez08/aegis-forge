@@ -3,7 +3,14 @@
 // Shows name, type, current readings, and health status
 
 import StatusBadge from "./StatusBadge";
-import { Settings, Wrench, Link as LinkIcon, Bot, MapPin, Factory } from "lucide-react";
+import {
+  Settings,
+  Wrench,
+  Link as LinkIcon,
+  Bot,
+  MapPin,
+  Factory,
+} from "lucide-react";
 import type { TelemetryReading } from "@/hooks/useSocket";
 
 interface MachineCardProps {
@@ -20,8 +27,14 @@ interface MachineCardProps {
   latestReading?: TelemetryReading;
 }
 
-export default function MachineCard({ machine, latestReading }: MachineCardProps) {
-  const status = (machine.status || "healthy") as "healthy" | "warning" | "critical";
+export default function MachineCard({
+  machine,
+  latestReading,
+}: MachineCardProps) {
+  const status = (machine.status || "healthy") as
+    | "healthy"
+    | "warning"
+    | "critical";
   const vibration = latestReading?.vibrationRms ?? 0;
   const temp = latestReading?.tempC ?? 0;
   const maxVib = parseFloat(machine.maxVibration);
@@ -64,7 +77,9 @@ export default function MachineCard({ machine, latestReading }: MachineCardProps
               {icons[machine.type] || <Factory className="h-6 w-6" />}
             </span>
             <div>
-              <h3 className="font-semibold text-foreground">{machine.name.replace(/_/g, " ")}</h3>
+              <h3 className="font-semibold text-foreground">
+                {machine.name.replace(/_/g, " ")}
+              </h3>
               <p className="text-xs text-zinc-500">{machine.type}</p>
             </div>
           </div>

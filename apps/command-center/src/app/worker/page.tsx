@@ -17,7 +17,7 @@ export default function WorkerPWA() {
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-card shadow-sm">
             <Image
-              src="/logo.png"
+              src="/logo.webp"
               alt="Aegis Node Logo"
               width={48}
               height={48}

@@ -9,8 +9,6 @@
 import { db, rawSql } from "./connection.js";
 import { machines, workers } from "./schema.js";
 
-
-
 const seedMachines = [
   {
     name: "CNC_Lathe_01",
@@ -50,7 +48,6 @@ const seedMachines = [
   },
 ];
 
-
 const seedWorkers = [
   {
     name: "Marcus Rodriguez",
@@ -72,7 +69,6 @@ const seedWorkers = [
   },
 ];
 
-
 async function seed() {
   console.log("🌱 [AEGIS] Seeding database...\n");
 
@@ -92,7 +88,7 @@ async function seed() {
 
     for (const m of insertedMachines) {
       console.log(
-        `    • ${m.name} (${m.type}) → baseline: ${m.baselineVibration} mm/s, max: ${m.maxVibration} mm/s, ${m.maxTemp}°C`
+        `    • ${m.name} (${m.type}) → baseline: ${m.baselineVibration} mm/s, max: ${m.maxVibration} mm/s, ${m.maxTemp}°C`,
       );
     }
     console.log(`  ✓ ${insertedMachines.length} machines inserted\n`);

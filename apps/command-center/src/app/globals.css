@@ -20,7 +20,7 @@
     --muted: #f1f5f9;
     --muted-foreground: #64748b;
   }
-  
+
   .dark {
     --background: #09090b;
     --foreground: #fafafa;
@@ -66,6 +66,10 @@ body {
 }
 
 .bg-grid {
-  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+  background-image: radial-gradient(
+    circle,
+    var(--color-border) 1px,
+    transparent 1px
+  );
   background-size: 24px 24px;
 }

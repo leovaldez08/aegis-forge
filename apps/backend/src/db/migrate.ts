@@ -16,8 +16,12 @@ async function migrate() {
       await rawSql`CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE`;
       console.log("  ✓ TimescaleDB extension enabled\n");
     } catch {
-      console.log("  ⚠ TimescaleDB not available — running with standard PostgreSQL");
-      console.log("    (Swap Docker image to timescale/timescaledb for hypertable support)\n");
+      console.log(
+        "  ⚠ TimescaleDB not available — running with standard PostgreSQL",
+      );
+      console.log(
+        "    (Swap Docker image to timescale/timescaledb for hypertable support)\n",
+      );
     }
 
     console.log("  → Creating machines table...");

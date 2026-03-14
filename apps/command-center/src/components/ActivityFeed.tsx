@@ -56,7 +56,9 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
               <BellOff className="mx-auto mb-2 h-8 w-8 text-muted-foreground opacity-50" />
-              <p className="text-sm text-foreground font-medium">No alerts yet</p>
+              <p className="text-sm text-foreground font-medium">
+                No alerts yet
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Machines are running smoothly
               </p>
@@ -66,14 +68,11 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
           alerts.map((alert) => {
             const cfg =
               severityConfig[alert.severity] || severityConfig.warning;
-            const time = new Date(alert.timestamp).toLocaleTimeString(
-              "en-US",
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              }
-            );
+            const time = new Date(alert.timestamp).toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            });
 
             return (
               <div
@@ -104,7 +103,10 @@ export default function ActivityFeed({ alerts }: ActivityFeedProps) {
                 {/* Worker footer */}
                 <div className="mt-2 flex items-center gap-1">
                   <span className="text-[10px] text-muted-foreground">
-                    Notified: <span className="font-medium text-foreground opacity-80">{alert.workerName}</span>
+                    Notified:{" "}
+                    <span className="font-medium text-foreground opacity-80">
+                      {alert.workerName}
+                    </span>
                   </span>
                 </div>
               </div>

@@ -10,33 +10,30 @@ import { desc, eq } from "drizzle-orm";
 
 export async function alertRoutes(app: FastifyInstance) {
   // Recent alerts with machine + worker info
-  app.get<{ Querystring: { limit?: string } }>(
-    "/api/alerts",
-    async (req) => {
-      const limit = parseInt(req.query.limit || "20", 10);
-      const alerts = await db
-        .select({
-          id: maintenanceLogs.id,
-          machineId: maintenanceLogs.machineId,
-          machineName: machines.name,
-          machineType: machines.type,
-          workerId: maintenanceLogs.workerId,
-          workerName: workers.name,
-          severity: maintenanceLogs.severity,
-          anomalyData: maintenanceLogs.anomalyData,
-          agentMessage: maintenanceLogs.agentMessage,
-          status: maintenanceLogs.status,
-          createdAt: maintenanceLogs.createdAt,
-        })
-        .from(maintenanceLogs)
-        .leftJoin(machines, eq(maintenanceLogs.machineId, machines.id))
-        .leftJoin(workers, eq(maintenanceLogs.workerId, workers.id))
-        .orderBy(desc(maintenanceLogs.createdAt))
-        .limit(limit);
+  app.get<{ Querystring: { limit?: string } }>("/api/alerts", async (req) => {
+    const limit = parseInt(req.query.limit || "20", 10);
+    const alerts = await db
+      .select({
+        id: maintenanceLogs.id,
+        machineId: maintenanceLogs.machineId,
+        machineName: machines.name,
+        machineType: machines.type,
+        workerId: maintenanceLogs.workerId,
+        workerName: workers.name,
+        severity: maintenanceLogs.severity,
+        anomalyData: maintenanceLogs.anomalyData,
+        agentMessage: maintenanceLogs.agentMessage,
+        status: maintenanceLogs.status,
+        createdAt: maintenanceLogs.createdAt,
+      })
+      .from(maintenanceLogs)
+      .leftJoin(machines, eq(maintenanceLogs.machineId, machines.id))
+      .leftJoin(workers, eq(maintenanceLogs.workerId, workers.id))
+      .orderBy(desc(maintenanceLogs.createdAt))
+      .limit(limit);
 
-      return { alerts };
-    }
-  );
+    return { alerts };
+  });
 
   // Update alert status (acknowledge / resolve)
   app.patch<{

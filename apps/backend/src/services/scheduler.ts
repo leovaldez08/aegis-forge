@@ -15,7 +15,7 @@ export function initScheduler(io: SocketServer) {
       const allMachines = await db.select().from(machines);
 
       for (const machine of allMachines) {
-        // We will simulate a long-term trend check by comparing the average vibration 
+        // We will simulate a long-term trend check by comparing the average vibration
         // over the last 30 seconds vs the machine's absolute baseline.
         // In a real prod TimescaleDB, this would use a Continuous Aggregate over days.
         const recentStats = await db
@@ -23,7 +23,9 @@ export function initScheduler(io: SocketServer) {
             avgVib: sql<number>`AVG(${telemetry.vibrationRms})`,
           })
           .from(telemetry)
-          .where(sql`${telemetry.machineId} = ${machine.id} AND ${telemetry.timestamp} >= NOW() - INTERVAL '30 seconds'`);
+          .where(
+            sql`${telemetry.machineId} = ${machine.id} AND ${telemetry.timestamp} >= NOW() - INTERVAL '30 seconds'`,
+          );
 
         if (!recentStats[0] || recentStats[0].avgVib === null) continue;
 
@@ -34,7 +36,7 @@ export function initScheduler(io: SocketServer) {
         // If the current average is steadily > 15% over baseline, but not yet critical
         // Suggest a scheduled maintenance before it hits max.
         const degradationThreshold = baseline * 1.15;
-        
+
         if (currentAvg > degradationThreshold && currentAvg < maxVib) {
           // Fetch an assigned worker
           const allWorkers = await db.select().from(workers);
@@ -42,7 +44,9 @@ export function initScheduler(io: SocketServer) {
 
           if (!assignedWorker) continue;
 
-          console.log(`📉 [TREND] Degradation detected on ${machine.name}. Triggering predictive AI alert.`);
+          console.log(
+            `📉 [TREND] Degradation detected on ${machine.name}. Triggering predictive AI alert.`,
+          );
 
           const anomalyData = {
             vibration_rms: parseFloat(currentAvg.toFixed(4)),
@@ -64,11 +68,17 @@ export function initScheduler(io: SocketServer) {
             baselineVibration: baseline,
             maxVibration: maxVib,
             maxTemp: Number(machine.maxTemp),
-            status: machine.status
+            status: machine.status,
           };
 
           // Trigger the AI to write a message
-          await triggerAlert(machineContext as any, assignedWorker, "warning", anomalyData as any, io);
+          await triggerAlert(
+            machineContext as any,
+            assignedWorker,
+            "warning",
+            anomalyData as any,
+            io,
+          );
         }
       }
     } catch (error) {

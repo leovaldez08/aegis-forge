@@ -23,7 +23,6 @@ import { telemetryRoutes } from "./routes/telemetry.js";
 import { alertRoutes } from "./routes/alerts.js";
 import { analyzeReading } from "./services/anomaly.js";
 
-
 async function bootstrap() {
   const app = Fastify({
     logger: {
@@ -88,7 +87,7 @@ async function bootstrap() {
   const mqttService = initMqttSubscriber(io, (machineId, data) => {
     // Fire-and-forget: anomaly detection runs async without blocking ingestion
     analyzeReading(machineId, data.vibration_rms, data.temp_c, io).catch(
-      (err) => console.error(`❌ [ANOMALY] Detection error:`, err)
+      (err) => console.error(`❌ [ANOMALY] Detection error:`, err),
     );
   });
 

@@ -19,7 +19,7 @@ import { triggerAlert } from "./alert.js";
 import type { Server as SocketServer } from "socket.io";
 
 const WINDOW_SIZE = 10; // --- Configuration ---
-const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes between alerts
+const COOLDOWN_MS = 10 * 60 * 1000; // 10 minutes between alerts for the same machine
 
 // Sliding windows and cooldown timers per machine.
 // Stored in memory for speed — this is a local edge node,
@@ -34,7 +34,6 @@ interface MachineWindow {
 
 const machineWindows: Map<string, MachineWindow> = new Map();
 
-
 function getWindow(machineId: string): MachineWindow {
   if (!machineWindows.has(machineId)) {
     machineWindows.set(machineId, {
@@ -46,7 +45,6 @@ function getWindow(machineId: string): MachineWindow {
   }
   return machineWindows.get(machineId)!;
 }
-
 
 function pushToWindow(arr: number[], value: number, maxSize: number) {
   arr.push(value);
@@ -70,9 +68,8 @@ interface MachineConfig {
 
 const machineCache: Map<string, MachineConfig> = new Map();
 
-
 async function getMachineConfig(
-  machineNameOrId: string
+  machineNameOrId: string,
 ): Promise<MachineConfig | null> {
   // Check cache first
   if (machineCache.has(machineNameOrId)) {
@@ -123,7 +120,6 @@ async function getMachineConfig(
   return config;
 }
 
-
 async function findAssignedWorker(location: string | null) {
   if (!location) return null;
   const results = await db
@@ -134,13 +130,11 @@ async function findAssignedWorker(location: string | null) {
   return results[0] || null;
 }
 
-
-
 export async function analyzeReading(
   machineId: string,
   vibration: number,
   temp: number,
-  io: SocketServer
+  io: SocketServer,
 ) {
   const machine = await getMachineConfig(machineId);
   if (!machine) {
@@ -153,7 +147,7 @@ export async function analyzeReading(
   pushToWindow(window.temperatures, temp, WINDOW_SIZE);
 
   // --- NEW ML ISOLATION FOREST FLOW --- //
-  
+
   // Package the window to send to Python AI Service
   const windowData = window.vibrations.map((v, i) => ({
     vibration_rms: v,
@@ -163,30 +157,41 @@ export async function analyzeReading(
   let newStatus: "healthy" | "warning" | "critical" = "healthy";
 
   try {
-    const mlResponse = await fetch(`${process.env.AI_SERVICE_URL || 'http://localhost:8000'}/detect-anomaly`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        machine: {
-          baseline_vibration: machine.baselineVibration,
-          max_vibration: machine.maxVibration,
-          max_temp: machine.maxTemp
-        },
-        window: windowData
-      })
-    });
+    const mlResponse = await fetch(
+      `${process.env.AI_SERVICE_URL || "http://localhost:8000"}/detect-anomaly`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          machine: {
+            baseline_vibration: machine.baselineVibration,
+            max_vibration: machine.maxVibration,
+            max_temp: machine.maxTemp,
+          },
+          window: windowData,
+        }),
+      },
+    );
 
     if (mlResponse.ok) {
-      const mlData = await mlResponse.json() as { is_anomaly: boolean, score: number, severity: "healthy" | "warning" | "critical" };
+      const mlData = (await mlResponse.json()) as {
+        is_anomaly: boolean;
+        score: number;
+        severity: "healthy" | "warning" | "critical";
+      };
       newStatus = mlData.severity;
-      
+
       // ML provides a negative score for anomalies.
       if (mlData.is_anomaly && mlData.score) {
-        console.log(`🧠 [ML] Isolation Forest detected anomaly! Score: ${mlData.score.toFixed(3)}`);
+        console.log(
+          `🧠 [ML] Isolation Forest detected anomaly! Score: ${mlData.score.toFixed(3)}`,
+        );
       }
     }
   } catch (error) {
-    console.warn("⚠️ [ML] Isolation Forest unreachable, falling back to basic threshold safety nets.");
+    console.warn(
+      "⚠️ [ML] Isolation Forest unreachable, falling back to basic threshold safety nets.",
+    );
     if (vibration > machine.maxVibration || temp > machine.maxTemp) {
       newStatus = "critical";
     }
@@ -230,15 +235,15 @@ export async function analyzeReading(
       window.temperatures.reduce((a, b) => a + b, 0) /
       window.temperatures.length,
     exceed_ratio_vibration: 0, // Deprecated by ML
-    exceed_ratio_temp: 0,      // Deprecated by ML
+    exceed_ratio_temp: 0, // Deprecated by ML
   };
 
   console.log(
-    `${newStatus === "critical" ? "🔴" : "🟡"} [ANOMALY] ${machine.name} → ${newStatus.toUpperCase()}`
+    `${newStatus === "critical" ? "🔴" : "🟡"} [ANOMALY] ${machine.name} → ${newStatus.toUpperCase()}`,
   );
   console.log(
     `   vib=${vibration.toFixed(2)} (max ${machine.maxVibration}), ` +
-      `temp=${temp.toFixed(1)} (max ${machine.maxTemp})`
+      `temp=${temp.toFixed(1)} (max ${machine.maxTemp})`,
   );
 
   // Trigger the alert pipeline (AI service + DB log + Socket.io)

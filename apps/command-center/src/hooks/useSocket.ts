@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { getSocket } from "@/lib/socket";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
 export interface TelemetryReading {
   machineId: string;
@@ -89,11 +90,10 @@ export function useSocket() {
       telemetryRef.current[machineId].push(data);
 
       // Trim to max window size
-      if (
-        telemetryRef.current[machineId].length > MAX_READINGS_PER_MACHINE
-      ) {
-        telemetryRef.current[machineId] =
-          telemetryRef.current[machineId].slice(-MAX_READINGS_PER_MACHINE);
+      if (telemetryRef.current[machineId].length > MAX_READINGS_PER_MACHINE) {
+        telemetryRef.current[machineId] = telemetryRef.current[machineId].slice(
+          -MAX_READINGS_PER_MACHINE,
+        );
       }
 
       // Debounce: flush to state every 500ms

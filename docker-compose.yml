@@ -22,8 +22,8 @@ services:
     container_name: aegis-mosquitto
     restart: unless-stopped
     ports:
-      - "1883:1883"   # MQTT
-      - "9001:9001"   # WebSocket (for debugging)
+      - "1883:1883" # MQTT
+      - "9001:9001" # WebSocket (for debugging)
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - aegis_mqtt_data:/mosquitto/data

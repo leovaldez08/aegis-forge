@@ -19,7 +19,7 @@ import mqtt from "mqtt";
 
 const BROKER_URL = process.env.MQTT_BROKER_URL || "mqtt://localhost:1883";
 const TOPIC_PREFIX = process.env.MQTT_TOPIC_PREFIX || "aegis/telemetry";
-const PUBLISH_INTERVAL_MS = 2000; // 2 seconds between readings
+const PUBLISH_INTERVAL_MS = 5000; // 5 seconds between readings
 
 // Machine definitions matching the seed data
 const MACHINES = [
@@ -76,7 +76,10 @@ function anomalyReading(max: number, overshootPercent = 0.2): number {
 }
 
 // Track anomaly state per machine for realistic degradation patterns
-const machineState: Record<string, { anomalyCounter: number; isAnomalous: boolean }> = {};
+const machineState: Record<
+  string,
+  { anomalyCounter: number; isAnomalous: boolean }
+> = {};
 
 for (const m of MACHINES) {
   machineState[m.id] = { anomalyCounter: 0, isAnomalous: false };
@@ -115,7 +118,7 @@ client.on("connect", () => {
         state.isAnomalous = true;
         state.anomalyCounter = 5 + Math.floor(Math.random() * 4);
         console.log(
-          `🔴 [SIMULATOR] ${machine.id} entering ANOMALY mode for ${state.anomalyCounter} readings`
+          `🔴 [SIMULATOR] ${machine.id} entering ANOMALY mode for ${state.anomalyCounter} readings`,
         );
       }
 
@@ -133,7 +136,7 @@ client.on("connect", () => {
         if (state.anomalyCounter === 0) {
           state.isAnomalous = false;
           console.log(
-            `🟢 [SIMULATOR] ${machine.id} returning to NORMAL operation`
+            `🟢 [SIMULATOR] ${machine.id} returning to NORMAL operation`,
           );
         }
       } else {
@@ -156,7 +159,7 @@ client.on("connect", () => {
       // Compact log: [cycle] status MACHINE vib=X.XX temp=XX.X
       console.log(
         `  [${String(cycleCount).padStart(4, "0")}] ${label} ${machine.id.padEnd(22)} ` +
-          `vib=${vibration.toFixed(2).padStart(6)} mm/s  temp=${temp.toFixed(1).padStart(5)}°C`
+          `vib=${vibration.toFixed(2).padStart(6)} mm/s  temp=${temp.toFixed(1).padStart(5)}°C`,
       );
     }
 

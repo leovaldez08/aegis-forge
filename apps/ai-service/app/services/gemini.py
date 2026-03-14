@@ -111,12 +111,12 @@ async def generate_alert_message(
     user_prompt = build_user_prompt(anomaly, severity)
 
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
             system_instruction=system_prompt,
-            temperature=0.7,       # Some creativity, but not too wild
-            max_output_tokens=200, # Keep it short for SMS/chat
-            top_p=0.9,
+            temperature=0.8,       # Increased for more natural phrasing
+            max_output_tokens=300, # Increased for longer/complete responses
+            top_p=0.95,
         ),
         contents=user_prompt,
     )

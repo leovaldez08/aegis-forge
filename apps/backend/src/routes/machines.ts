@@ -15,16 +15,19 @@ export async function machineRoutes(app: FastifyInstance) {
   });
 
   // Get a single machine by ID
-  app.get<{ Params: { id: string } }>("/api/machines/:id", async (req, reply) => {
-    const machine = await db
-      .select()
-      .from(machines)
-      .where(eq(machines.id, req.params.id))
-      .limit(1);
+  app.get<{ Params: { id: string } }>(
+    "/api/machines/:id",
+    async (req, reply) => {
+      const machine = await db
+        .select()
+        .from(machines)
+        .where(eq(machines.id, req.params.id))
+        .limit(1);
 
-    if (machine.length === 0) {
-      return reply.status(404).send({ error: "Machine not found" });
-    }
-    return { machine: machine[0] };
-  });
+      if (machine.length === 0) {
+        return reply.status(404).send({ error: "Machine not found" });
+      }
+      return { machine: machine[0] };
+    },
+  );
 }
