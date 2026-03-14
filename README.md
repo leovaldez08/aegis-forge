@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="apps/command-center/public/logo.png" alt="Aegis Node Logo" width="120" />
+  <img src="apps/command-center/public/logo.webp" alt="Aegis Node Logo" width="120" />
   <h1>Aegis Node</h1>
   <p><strong>Predictive Machine Maintenance with an AI Conversational Voice</strong></p>
 </div>
